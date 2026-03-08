@@ -34,29 +34,30 @@ def check_guess(guess, secret):
         return "Win", "🎉 Correct!"
 
     try:
+        # FIX: switched the return values using copilot agent to fix the wrong hints
         if guess > secret:
-            return "Too High", "📈 Go HIGHER!"
+            return "Too High", "📉 Go LOWER!"
         else:
-            return "Too Low", "📉 Go LOWER!"
+            return "Too Low", "📈 Go HIGHER!"
     except TypeError:
         g = str(guess)
         if g == secret:
             return "Win", "🎉 Correct!"
         if g > secret:
-            return "Too High", "📈 Go HIGHER!"
-        return "Too Low", "📉 Go LOWER!"
+            return "Too High", "📉 Go LOWER!"
+        return "Too Low", "📈 Go HIGHER!"
 
 
 def update_score(current_score: int, outcome: str, attempt_number: int):
     if outcome == "Win":
-        points = 100 - 10 * (attempt_number + 1)
+        points = 100 - 10 * (attempt_number - 1) 
         if points < 10:
             points = 10
         return current_score + points
 
     if outcome == "Too High":
         if attempt_number % 2 == 0:
-            return current_score + 5
+            return current_score + 5  # rewarding a wrong guess!
         return current_score - 5
 
     if outcome == "Too Low":
@@ -93,7 +94,7 @@ if "secret" not in st.session_state:
     st.session_state.secret = random.randint(low, high)
 
 if "attempts" not in st.session_state:
-    st.session_state.attempts = 1
+    st.session_state.attempts = 0   # starts attmepts at 0 instead of 1 so it doesnt show game over at 1 attempt left
 
 if "score" not in st.session_state:
     st.session_state.score = 0
@@ -107,8 +108,8 @@ if "history" not in st.session_state:
 st.subheader("Make a guess")
 
 st.info(
-    f"Guess a number between 1 and 100. "
-    f"Attempts left: {attempt_limit - st.session_state.attempts}"
+    f"Guess a number between 1 and 100. " # Info text was hardcoded "1 and 100" 
+    f"Attempts left: {max(0, attempt_limit - st.session_state.attempts)}"   # ends when attempt = 0
 )
 
 with st.expander("Developer Debug Info"):
@@ -132,8 +133,11 @@ with col3:
     show_hint = st.checkbox("Show hint", value=True)
 
 if new_game:
-    st.session_state.attempts = 0
-    st.session_state.secret = random.randint(1, 100)
+    st.session_state.attempts = 0   # starts attmepts at 0 instead of 1 so it doesnt show game over at 1 attempt left
+    st.session_state.secret = random.randint(low, high)
+    st.session_state.score = 0
+    st.session_state.status = "playing"
+    st.session_state.history = []
     st.success("New game started.")
     st.rerun()
 
@@ -155,6 +159,7 @@ if submit:
     else:
         st.session_state.history.append(guess_int)
 
+        # Secret is converted to a string on even attempts
         if st.session_state.attempts % 2 == 0:
             secret = str(st.session_state.secret)
         else:
@@ -179,7 +184,7 @@ if submit:
                 f"Final score: {st.session_state.score}"
             )
         else:
-            if st.session_state.attempts >= attempt_limit:
+            if st.session_state.attempts > attempt_limit:   # ficed showing gameover even when there is one attempt left
                 st.session_state.status = "lost"
                 st.error(
                     f"Out of attempts! "
