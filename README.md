@@ -25,13 +25,26 @@ It wrote the code, ran away, and now the game is unplayable.
 
 ## 📝 Document Your Experience
 
-- [ ] Describe the game's purpose.
-- [ ] Detail which bugs you found.
-- [ ] Explain what fixes you applied.
+- [x] Describe the game's purpose.
+This is a number guessing game where you try to guess a secret number within a limited number of attempts. The game gives you hints (higher/lower) after each guess and tracks your score.
+
+- [x] Detail which bugs you found.
+Hints were reversed (Too High said "Go HIGHER", Too Low said "Go LOWER")
+New Game button didn't reset the game status so Submit stopped working
+Game ended one attempt too early due to >= instead of >
+Score was 0 on a win because the formula used +1 instead of -1
+Attempts counter showed -1 at the end
+
+- [x] Explain what fixes you applied.
+wapped the hint messages in check_guess
+Reset status, score, history, and attempts properly in the New Game handler
+Changed >= to > in the attempt limit check
+Fixed the win score formula from attempt_number + 1 to attempt_number - 1
+Wrapped attempts display with max()
 
 ## 📸 Demo
 
-- [ ] [Insert a screenshot of your fixed, winning game here]
+- [x] ![winning game screenshot](screenshot.png)
 
 ## 🚀 Stretch Features
 
